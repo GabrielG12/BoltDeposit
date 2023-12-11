@@ -1,4 +1,5 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
+
 from rest_framework_simplejwt.tokens import AccessToken
 
 
@@ -12,6 +13,10 @@ class IsAccountOwner(BasePermission):
 
         # Extract user from JWT token
         if isinstance(request.auth, AccessToken):
-            user = request.auth.payload.get('id')
+            token_payload = request.auth.payload
+            user = token_payload.get('user_id')
             return user and obj.user.id == user
         return False
+
+
+

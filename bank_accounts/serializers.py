@@ -23,14 +23,15 @@ class BankAccountSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user', {})
         username = user_data.get('username')
         email = user_data.get('email')
+
+        # Check if the username already exists
+        existing_username = User.objects.filter(username=username).exists()
+        existing_email = User.objects.filter(email=email).exists()
+        if not existing_username or not existing_email:
+            raise serializers.ValidationError(f"This user doesn't exist!")
+
+        # Create the user if the username is available
         user_instance, _ = User.objects.get_or_create(username=username, email=email)
+
         bank_account_instance = BankAccount.objects.create(user=user_instance, **validated_data)
         return bank_account_instance
-
-
-class SelfDepositWithdrawSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = BankAccount
-        fields = ['id', 'balance']
-
